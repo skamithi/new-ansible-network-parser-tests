@@ -1,0 +1,19 @@
+---
+- hosts: all
+  connection: local
+  gather_facts: false
+  vars:
+    ansible_network_os: nxos
+  roles:
+    - ansible-network.network-engine
+  tasks:
+    - name: parse show ip bgp sum
+      text_parser:
+        file: "parsers/ios_bgp_parser.yml"
+        content: "{{ lookup('file' , 'ios_bgp_output.txt') }}"
+
+    - debug: msg="{{ neighbor_list[nei_ip] }}"
+
+    - include_tasks: bgp_idle.yml
+      when: neighbor_list[nei_ip] is defined and neighbor_list[nei_ip].idle == True
+
